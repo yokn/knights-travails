@@ -4,10 +4,15 @@ class Board
   attr_accessor :board
   require_relative 'node'
   def initialize
-    @board = Array.new(8) { Array.new(8, Node.new) }
+    @board = []
+    # @board = Array.new(8) { Array.new(8, Node.new(i)) }
+    64.times do |tile_number|
+      @board << Node.new(tile_number)
+    end
+    # p @board
   end
 
-  def next
-    @board[0][0]
+  def find(row, column)
+    @board[row * 8 + column]
   end
 end
