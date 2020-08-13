@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+require_relative 'knight'
+
 class Node
+  attr_accessor :available_moves, :data
   def initialize(tile_number)
     @data = tile_number
     @available_moves = []
