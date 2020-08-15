@@ -1,61 +1,79 @@
 # frozen_string_literal: true
 
-require_relative 'board'
-LEGAL_MOVES = [[2, 1], [2, -1], [1, 2], [1, -2], [-2, -1], [-2, 1], [-1, -2], [-1, 2]].freeze
+# require_relative 'board'
+require_relative 'node'
+MOVESET_KNIGHT = [[2, 1], [2, -1], [1, 2], [1, -2], [-2, -1], [-2, 1], [-1, -2], [-1, 2]].freeze
 
 # rubocop:disable Metrics/AbcSize
 # rubocop:disable Metrics/MethodLength
 class Knight
   def initialize
-    @board = Board.new
+    # @board = Board.new
     @already_moved = []
     # generate_available_moves(pos)
   end
 
-  def generate_available_moves(start)
-    p start
+  def generate_available_moves(pos, parent, nodes = [])
+    p pos
 
-    node = @board.find(start[0], start[1])
+    # node = @board.find(pos[0], pos[1])
 
-    LEGAL_MOVES.each do |move|
+    MOVESET_KNIGHT.each do |move|
       # p move
       # p move[0]
       # p move[1]
-      if start[0] + move[0] <= 7 && start[0] + move[0] >= 0 &&
-         start[1] + move[1] <= 7 && start[1] + move[1] >= 0 &&
-         !@already_moved.include?([start[0] + move[0], start[1] + move[1]])
-        p "#{start[0] + move[0]},#{start[1] + move[1]} is possible"
-        @already_moved << [start[0] + move[0], start[1] + move[1]]
-        node.add_available_moves(start[0] + move[0], start[1] + move[1])
-        # return [start[0] + move[0], start[1] + move[1]]
-      else
-        p "#{start[0] + move[0]},#{start[1] + move[1]} is unavailable"
-      end
+      next unless pos[0] + move[0] <= 7 && pos[0] + move[0] >= 0 &&
+                  pos[1] + move[1] <= 7 && pos[1] + move[1] >= 0 &&
+                  !@already_moved.include?([pos[0] + move[0], pos[1] + move[1]])
+
+      # p "#{pos[0] + move[0]},#{pos[1] + move[1]} is possible"
+      @already_moved << [pos[0] + move[0], pos[1] + move[1]]
+      nodes << Node.new([pos[0] + move[0], pos[1] + move[1]], parent)
+      # return [pos[0] + move[0], pos[1] + move[1]]
+      # else
+      #   p "#{pos[0] + move[0]},#{pos[1] + move[1]} is unavailable"
     end
-    node.available_moves
+    nodes
   end
 
   def level_order(pointer, finish, queue = [], path = [])
-    # return if pointer.nil?
-    # finish = finish[0] * 8 + finish[1]
-    # pointer = @board.find(pointer[0], pointer[1])
+    knight = Node.new(pointer)
 
     # p pointer
-    queue << pointer
+    queue << knight
     until queue.empty?
       p queue
-      # queue.flatten!(1)
-      current = queue.shift
-      p current
-      # binding.pry
-      return path if current == finish
 
-      # division = current.data / 8
-      # remainder = current.data % 8
-      result = generate_available_moves(current)
+      # p queue[0]
+      # knight.parent = queue[0]
+      # p "set parent to #{knight.parent}"
+      # p knight
+      # p knight.parent
+
+      knight = queue.shift
+      p knight.data
+
+      # p finish
+      if knight.data == finish
+        p '------------------'
+        p 'FOUND'
+        p 'THE'
+        p 'ANSWER'
+        p '------------------'
+        until knight.parent.nil?
+          p knight
+          path << knight.data
+          p "added #{knight.data} to path"
+          knight = knight.parent # unless knight.parent.nil?
+        end
+        return [pointer] + path.reverse
+      end
+
+      result = generate_available_moves(knight.data, knight)
       queue += result unless result.nil?
-      path += result unless result.nil?
-      # queue.shift
+
     end
   end
 end
+
+# MAKE EVERY AVAILABLE MOVE ITS OWN NODE
